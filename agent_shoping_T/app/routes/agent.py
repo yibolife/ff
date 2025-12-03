@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from app import db
 from app.forms import AgentInfoForm, AgentSubmitForm, AgentDeleteForm
-from app.models import AgentInfo, User, ShoppingCircle, ShoppingInfo
+from app.models import AgentInfo, User, ShoppingCircle, ShoppingInfo, Binding
+from app.forms.binding_forms import UnbindForm
 
 agent_bp = Blueprint('agent', __name__)
 
@@ -19,7 +20,6 @@ def agent_info():
     submit_form = AgentSubmitForm()
     delete_form = AgentDeleteForm()
 
-    # 接收跳转参数
     redirect_source = request.args.get('redirect_source')
     target_buyer_id = request.args.get('target_buyer_id')
 
@@ -78,11 +78,9 @@ def agent_info():
             return redirect(url_for('agent.agent_info', redirect_source=redirect_source, target_buyer_id=target_buyer_id))
 
         try:
-            # 删除绑定记录
             related_bindings = Binding.query.filter_by(agent_id=current_user.id).all()
             for binding in related_bindings:
                 db.session.delete(binding)
-            # 删除行程
             db.session.delete(existing_info)
             db.session.commit()
             flash(f'代购行程已删除，解除了 {len(related_bindings)} 个绑定关系', 'success')
@@ -120,7 +118,6 @@ def agent_circle():
 # 代购列表（非代购用户绑定代购）
 @agent_bp.route('/agent_list')
 def agent_list():
-    from app.models import Binding
     agent_data = db.session.query(User, AgentInfo).join(
         AgentInfo,
         User.id == AgentInfo.user_id
@@ -130,7 +127,7 @@ def agent_list():
         {
             'user': user,
             'agent_info': info,
-            'agent_name': info.所属用户.username
+            'agent_name': user.username
         } for user, info in agent_data
     ]
     return render_template('agent_list.html', agent_data=agent_data)
@@ -143,15 +140,27 @@ def contacted_trips():
         flash('您没有权限访问此页面', 'danger')
         return redirect(url_for('home'))
 
-    from app.models import Binding
-    bindings = Binding.query.filter_by(agent_id=current_user.id).all()
-    enriched_bindings = []
-    for binding in bindings:
-        buyer_circle = ShoppingCircle.query.filter_by(user_id=binding.buyer_id).first()
-        buyer_products = ShoppingInfo.query.filter_by(user_id=binding.buyer_id).all() if buyer_circle else []
-        enriched_bindings.append({
+    bindings = Binding.query.filter_by(agent_id=current_user.id) \
+        .join(User, Binding.buyer_id == User.id) \
+        .add_columns(User) \
+        .order_by(Binding.created_at.desc()) \
+        .all()
+
+    agent_itinerary = AgentInfo.query.filter_by(user_id=current_user.id).first()
+    enriched_trips = []
+    for binding, buyer in bindings:
+        buyer_circle = ShoppingCircle.query.filter_by(user_id=buyer.id).first()
+        buyer_products = ShoppingInfo.query.filter_by(user_id=buyer.id).all() if buyer_circle else []
+        enriched_trips.append({
             "binding": binding,
+            "buyer": buyer,
             "buyer_circle": buyer_circle,
             "buyer_products": buyer_products,
+            "agent_itinerary": agent_itinerary
         })
-    return render_template('contacted_trips.html', trips=enriched_bindings)
+
+    if not enriched_trips:
+        flash('暂无已绑定的买家行程，可前往购物圈绑定新买家', 'info')
+
+    unbind_form = UnbindForm()
+    return render_template('contacted_trips.html', trips=enriched_trips, form=unbind_form)

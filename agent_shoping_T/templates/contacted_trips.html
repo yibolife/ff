@@ -1,92 +1,188 @@
 {% extends "base.html" %}
 
-{% block title %}已联系用户 - 代购购物平台{% endblock %}
+{% block title %}已联系行程 - 代购购物平台{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2 class="mb-4">我联系的用户</h2>
+<div class="container mt-4">
+    <!-- 页面标题与操作栏 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>已联系行程（代购视角）</h2>
+        <a href="{{ url_for('shopping.shopping_circle') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> 前往购物圈绑定新买家
+        </a>
+    </div>
 
-        {% if trips %}  <!-- 检查后端传递的enriched_trips是否存在 -->
-            <!-- 核心：用for循环遍历enriched_trips，定义循环变量为item -->
-            {% for item in trips %}
-                {% set binding = item.binding %}
-                {% set circle = item.buyer_circle %}
-                {% set products = item.buyer_products %}
+    <!-- 行程列表 -->
+    {% if trips %}
+        <div class="row gap-4">
+            {% for trip in trips %}
+                <!-- 多层条件判断容错 -->
+                {% set binding = trip.binding if trip.binding else {} %}
+                {% set buyer = trip.buyer if (trip.buyer) else (binding.buyer if (binding and binding.buyer) else {}) %}
+                {% set buyer_circle = trip.buyer_circle if trip.buyer_circle else {} %}
+                {% set buyer_products = trip.buyer_products if trip.buyer_products else [] %}
+                {% set agent_itinerary = trip.agent_itinerary if (trip.agent_itinerary) else (current_user.agent_itinerary if current_user.agent_itinerary else {}) %}
 
-                <div class="list-group-item list-group-item-action mb-3">
-                    <!-- 联系人信息 -->
-                    <div class="d-flex w-100 justify-content-between flex-wrap">
-                        <h5 class="mb-1">联系人：{{ binding.buyer.username|default('未知用户') }}</h5>
-                        <h5 class="mb-1">电话：
-                            {% if binding.buyer.phone %}
-                                {{ binding.buyer.phone[:3] }}****{{ binding.buyer.phone[-4:] }}
-                            {% else %}
-                                未填写
-                            {% endif %}
-                        </h5>
-                        <small>绑定时间：{{ binding.created_at.strftime('%Y-%m-%d %H:%M') if binding.created_at else '未知时间' }}</small>
-                    </div>
-
-                    <!-- 绑定状态 -->
-                    <p class="mb-1">
-                        绑定状态：
-                        {% if binding.status == 'pending' %}
-                            <span class="badge bg-warning">待确认</span>
-                        {% elif binding.status == 'confirmed' %}
-                            <span class="badge bg-success">已确认</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{{ binding.status|default('未知状态') }}</span>
-                        {% endif %}
-                    </p>
-
-                    <!-- 购物圈信息 -->
-                    {% if circle %}
-                        <p><strong>提交时间：</strong>{{ circle.submit_time.strftime('%Y-%m-%d %H:%M') if circle.submit_time else '未知' }}</p>
-                        <p><strong>总金额：</strong><span class="text-danger">{{ "%.2f"|format(circle.total_price) }} 元</span></p>
-                    {% else %}
-                        <p class="text-muted">该用户暂无提交的购物信息</p>
-                    {% endif %}
-
-                    <!-- 商品列表 -->
-                    {% if products and products|length > 0 %}
-                        <div class="mt-3">
-                            <h5>商品列表：</h5>
-                            <div class="bg-light p-2 rounded">
-                                {% for product in products %}
-                                    <div class="mb-2 pb-2 border-bottom">
-                                        <div class="d-flex justify-content-between">
-                                            <span>{{ product.serial_number }}. {{ product.product_name }}</span>
-                                            <span>{{ product.price }} 元</span>
-                                        </div>
-                                        {% if product.description %}
-                                            <small class="text-muted">{{ product.description }}</small>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
+                <!-- 行程卡片 -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <!-- 卡片头部（绑定状态） -->
+                        <div class="card-header
+                            {% if binding.status == 'confirmed' %}bg-success{% elif binding.status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}
+                            text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <!-- 买家用户名 -->
+                                <h5 class="card-title mb-0">
+                                    买家：
+                                    {% if buyer and buyer.username %}
+                                        {{ buyer.username }}
+                                    {% elif binding and binding.buyer_username %}
+                                        {{ binding.buyer_username }}
+                                    {% else %}
+                                        未知用户
+                                    {% endif %}
+                                </h5>
+                                <span class="badge bg-white text-dark">
+                                    {{ binding.status|replace('confirmed', '已确认')|replace('pending', '待确认')|replace('binded', '已绑定') if binding.status else '未知状态' }}
+                                </span>
                             </div>
                         </div>
-                    {% elif circle %}
-                        <p class="text-muted mt-2">暂无商品信息</p>
-                    {% endif %}
 
-                    <!-- 操作按钮 -->
-                    <div class="mt-4">
-                        {% if binding.status == 'pending' and binding.id %}
-                            <form action="{{ url_for('binding.confirm_binding', binding_id=binding.id) }}" method="POST" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('确定要确认绑定吗？')">确认绑定
+                        <!-- 卡片-body -->
+                        <div class="card-body">
+                            <!-- 买家基础信息 -->
+                            <div class="mb-3">
+                                <p class="mb-1"><strong>绑定时间：</strong>
+                                    {% if binding and binding.created_at %}
+                                        {{ binding.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                    {% else %}
+                                        未知时间
+                                    {% endif %}
+                                </p>
+                                <p class="mb-0"><strong>买家电话：</strong>
+                                    {% if buyer and buyer.phone %}
+                                        {{ buyer.phone[:3] }}****{{ buyer.phone[-4:] }}
+                                    {% elif binding and binding.buyer_phone %}
+                                        {{ binding.buyer_phone[:3] }}****{{ binding.buyer_phone[-4:] }}
+                                    {% else %}
+                                        <span class="text-muted">未填写</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <!-- 代购行程信息 -->
+                            <div class="bg-primary/5 p-3 rounded mb-3">
+                                <h6 class="text-primary mb-2">我的代购行程</h6>
+                                <p class="mb-1"><strong>目的地：</strong>
+                                    {% if agent_itinerary and agent_itinerary.location %}
+                                        {{ agent_itinerary.location }}
+                                    {% else %}
+                                        未设置
+                                    {% endif %}
+                                </p>
+                                <p class="mb-1"><strong>出行时间：</strong>
+                                    {% if agent_itinerary and agent_itinerary.time %}
+                                        {{ agent_itinerary.time.strftime('%Y-%m-%d %H:%M') }}
+                                    {% else %}
+                                        未设置
+                                    {% endif %}
+                                </p>
+                                <p class="mb-0"><strong>行程描述：</strong>
+                                    {% if agent_itinerary and agent_itinerary.itinerary %}
+                                        {{ agent_itinerary.itinerary }}
+                                    {% elif agent_itinerary and agent_itinerary.description %}
+                                        {{ agent_itinerary.description }}
+                                    {% else %}
+                                        未填写
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <!-- 买家购物信息 -->
+                            {% if buyer_circle %}
+                                <div class="mb-3">
+                                    <p class="mb-1"><strong>提交时间：</strong>
+                                        {% if buyer_circle.submit_time %}
+                                            {{ buyer_circle.submit_time.strftime('%Y-%m-%d %H:%M') }}
+                                        {% else %}
+                                            未知
+                                        {% endif %}
+                                    </p>
+                                    <p class="mb-0"><strong>总金额：</strong>
+                                        <span class="text-danger fs-6">{{ "%.2f"|format(buyer_circle.total_price if buyer_circle.total_price else 0) }} 元</span>
+                                    </p>
+                                </div>
+
+                                <!-- 商品清单（取消折叠，直接展示） -->
+                                <div class="mb-2 bg-light p-2 rounded">
+                                    <h6 class="mb-2">商品清单（{{ buyer_products|length }} 件）：</h6>
+                                    {% if buyer_products %}
+                                        <ul class="list-unstyled mb-0">
+                                            {% for product in buyer_products %}
+                                                <li class="d-flex justify-content-between py-1 border-bottom">
+                                                    <span>{{ loop.index }}. {{ product.product_name if (product and product.product_name) else '未知商品' }}</span>
+                                                    <span>{{ product.price if (product and product.price) else 0 }} 元</span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p class="text-muted mb-0">暂无商品信息</p>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info p-2 mb-3 text-center">
+                                    买家暂无提交购物需求
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- 卡片底部（操作按钮：解除绑定 + 确认绑定） -->
+                        <div class="card-footer bg-transparent d-flex justify-content-between gap-2">
+                            <!-- 核心变更：查看详情 → 解除绑定（POST 表单 + CSRF 保护） -->
+                            {% if binding and binding.id %}
+                                <form action="{{ url_for('binding.unbind', binding_id=binding.id) }}" method="POST" style="display: inline; width: 100%;">
+                                    <!-- CSRF 令牌：依赖 binding.py 中 unbind 路由传递的 form 实例 -->
+                                    {{ form.hidden_tag() }}
+                                    <!-- 仅已确认/已绑定状态显示解除按钮，待确认状态隐藏 -->
+                                    {% if binding.status in ['confirmed', 'binded'] %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('确定要解除与 {{ buyer.username|default('未知用户', true) }} 的绑定吗？解除后不可恢复！')">
+                                            解除绑定
+                                        </button>
+                                    {% else %}
+                                        <!-- 待确认状态显示「不可解除」灰色按钮 -->
+                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>
+                                            不可解除
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>
+                                    无效绑定
                                 </button>
-                            </form>
-                        {% endif %}
+                            {% endif %}
+
+                            <!-- 确认绑定按钮（仅待确认状态显示） -->
+                            {% if binding and binding.status == 'pending' and binding.id %}
+                                <a href="{{ url_for('binding.confirm_binding', binding_id=binding.id) }}" class="btn btn-sm btn-success flex-1">
+                                    确认绑定
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            {% endfor %}  <!-- 循环结束 -->
-        {% else %}
-            <div class="alert alert-info">
-                暂无联系的用户，快去购物圈联系用户吧！
-                <a href="{{ url_for('shopping.shopping_circle') }}" class="alert-link">前往购物圈</a>
-            </div>
-        {% endif %}
-    </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- 无数据提示 -->
+        <div class="alert alert-info text-center p-5">
+            <i class="bi bi-info-circle fs-4 mb-2"></i>
+            <p class="mb-3">暂无已联系的行程</p>
+            <a href="{{ url_for('shopping.shopping_circle') }}" class="btn btn-primary">
+                前往购物圈绑定买家
+            </a>
+        </div>
+    {% endif %}
 </div>
+
+<!-- 移除折叠组件JS（无需再引入） -->
 {% endblock %}

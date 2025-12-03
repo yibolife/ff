@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}我的绑定列表 - 代购/购物系统{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>我的绑定记录</h3>
+        <a href="{{ url_for('shopping.shopping_circle') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> 去购物圈绑定新用户
+        </a>
+    </div>
+
+    <!-- 绑定记录表格 -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if bindings %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>序号</th>
+                                <th>代购人</th>
+                                <th>购物人</th>
+                                <th>绑定状态</th>
+                                <th>绑定时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for binding in bindings %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ binding.agent.username }}</td>
+                                    <td>{{ binding.buyer.username }}</td>
+                                    <td>
+                                        {% if binding.status == 'pending' %}
+                                            <span class="badge bg-warning">待确认</span>
+                                        {% elif binding.status == 'confirmed' %}
+                                            <span class="badge bg-success">已确认</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">已取消</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ binding.created_at.strftime('%Y-%m-%d %H:%M') if binding.created_at else '暂无' }}</td>
+                                    <td>
+                                        <!-- 查看详情 -->
+                                        <a href="{{ url_for('binding.binding_detail', binding_id=binding.id) }}" class="btn btn-sm btn-outline-info">
+                                            详情
+                                        </a>
+                                        <!-- 确认绑定按钮（仅待确认状态 + 有权限） -->
+                                        {% if binding.status == 'pending' and current_user.id in [binding.agent_id, binding.buyer_id] %}
+                                            <form method="POST" action="{{ url_for('binding.confirm_binding', binding_id=binding.id) }}" class="d-inline ms-1">
+                                                {{ form.hidden_tag() }}  <!-- CSRF 令牌 -->
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('确定要确认该绑定吗？')">
+                                                    确认
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <!-- 无绑定记录提示 -->
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> 暂无绑定记录，快去购物圈绑定代购人/买家吧！
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

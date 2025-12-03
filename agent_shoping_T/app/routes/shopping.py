@@ -176,10 +176,3 @@ def purchased_products():
         })
 
     return render_template('purchased_products.html', trips=enriched_trips)
-
-# 聊天页面
-@shopping_bp.route('/chat/<int:user_id>')
-@login_required
-def chat(user_id):
-    other_user = User.query.get_or_404(user_id)
-    return render_template('chat.html', other_user=other_user)

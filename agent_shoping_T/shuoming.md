@@ -12,6 +12,7 @@ your_project/
 │   │   ├── auth_forms.py     # 注册、登录、身份选择表单
 │   │   ├── agent_forms.py    # 代购行程相关表单
 │   │   └── shopping_forms.py # 商品、购物圈相关表单
+│   │   └── binding_forms.py # 商品、购物圈相关表单 xinjia
 │   ├── routes/               # 路由模块（按功能拆分蓝图）
 │   │   ├── __init__.py
 │   │   ├── auth.py           # 认证路由（注册、登录、退出、choice）
@@ -37,6 +38,8 @@ your_project/
 │   ├── purchased_products.html
 │   ├── agent_list.html
 │   └── chat.html
+|   ----choose_identity
+|   -----confirm_bingding  xinjia
 ├── config.py                 # 配置文件（集中管理所有配置）
 ├── requirements.txt          # 依赖包清单
 └── run.py                    # 项目启动入口

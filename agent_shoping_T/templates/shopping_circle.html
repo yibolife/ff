@@ -91,12 +91,13 @@
                                     </div>
                                 </div>
 
-                                <!-- 联系按钮：保持原有逻辑 -->
+                                <!-- 联系按钮：修改为直接确认绑定 -->
                                 <div class="mt-4">
                                     {% if current_user.is_authenticated and current_user.is_agent %}
                                         {% if has_valid_itinerary %}
-                                            <a href="{{ url_for('binding.bind_buyer', buyer_id=data.user.id) }}" class="btn btn-success">
-                                                <i class="bi bi-handshake"></i> 联系该用户
+                                            <!-- 核心修改：跳转路由改为直接确认绑定，按钮文本调整 -->
+                                            <a href="{{ url_for('binding.bind_buyer_direct_confirm', buyer_id=data.user.id) }}" class="btn btn-success" onclick="return confirm('确定要直接绑定该买家吗？绑定后状态为已确认！')">
+                                                <i class="bi bi-handshake"></i> 联系并确认绑定
                                             </a>
                                         {% else %}
                                             <a href="{{ url_for('agent.agent_info', redirect_source='shopping_circle', target_buyer_id=data.user.id) }}" class="btn btn-success">

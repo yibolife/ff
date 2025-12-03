@@ -112,16 +112,7 @@
                             </form>
                         {% endif %}
 
-                        <!-- 替换原有的联系按钮代码 -->
-                        {% if current_user.is_agent and buyer and buyer.id %}
-                            <a href="{{ url_for('chat', user_id=buyer.id) }}" class="btn btn-sm btn-info ms-2">
-                            联系买家
-                            </a>
-                        {% elif not current_user.is_agent and agent_user and agent_user.id %}
-                            <a href="{{ url_for('chat', user_id=agent_user.id) }}" class="btn btn-sm btn-info ms-2">
-                            联系代购
-                            </a>
-                        {% endif %}
+                        <!-- 已彻底删除：联系买家/代购的聊天按钮（无注释，直接移除） -->
                     </div>
                 </div>
             {% endfor %}

@@ -9,7 +9,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')  # 优先从环境变量获取
 
     # 数据库配置
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', f'sqlite:///{os.path.join(BASE_DIR, "site66.db")}')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', f'sqlite:///{os.path.join(BASE_DIR, "site67.db")}')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # 上传配置

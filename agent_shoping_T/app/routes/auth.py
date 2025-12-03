@@ -46,7 +46,6 @@ def send_verify_code(phone: str, code_length: int = 6) -> dict:
         }
 
 
-
 # ------------------------------
 # 登录路由
 # ------------------------------
@@ -170,6 +169,7 @@ def send_verify_code_api():
         error_msg = f"服务器错误：{str(e)[:30]}"
         print(f"发送验证码接口报错：{error_msg}")
         return jsonify({"success": False, "message": error_msg}), 500
+
 
 # ------------------------------
 # 身份选择路由（使用 AgentChoiceForm）
