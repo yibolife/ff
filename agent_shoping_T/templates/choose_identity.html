@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}选择用户身份 - 代购/购物系统{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4 class="mb-0">选择用户身份</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 身份选择表单 -->
+                        <form method="POST">
+                            {{ form.hidden_tag() }}  <!-- CSRF 保护 -->
+
+                            <!-- 身份选项（单选按钮） -->
+                            <div class="form-group mb-4">
+                                <label class="form-label fw-bold">请选择您的用户类型：</label>
+                                <div class="d-flex flex-column gap-3 mt-2">
+                                    {% for subfield in form.identity_type %}
+                                        <div class="form-check">
+                                            {{ subfield(class="form-check-input", id=subfield.id) }}
+                                            <label class="form-check-label" for="{{ subfield.id }}">
+                                                {{ subfield.label.text }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- 表单验证错误提示 -->
+                                {% if form.identity_type.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.identity_type.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- 提交按钮 -->
+                            <div class="d-grid">
+                                {{ form.submit(class="btn btn-primary btn-lg") }}
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center text-muted">
+                        <a href="{{ url_for('home') }}" class="text-decoration-none">返回首页</a>
+                        &nbsp;|&nbsp;
+                        <a href="{{ url_for('auth.logout') }}" class="text-decoration-none">退出登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

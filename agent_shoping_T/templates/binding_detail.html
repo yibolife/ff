@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}绑定详情 - 代购/购物系统{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3>绑定详情</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>代购人：</strong>{{ current_user.username }}</p>
+            <p><strong>购物人：</strong>{{ binding.buyer.username }}</p>
+            <p><strong>绑定状态：</strong>
+                {% if binding.status == 'pending' %}
+                    <span class="badge bg-warning">待确认</span>
+                {% else %}
+                    <span class="badge bg-success">已确认</span>
+                {% endif %}
+            </p>
+            <p><strong>绑定时间：</strong>{{ binding.created_at.strftime('%Y-%m-%d %H:%M') }}</p>  <!-- 注意字段名与模型一致（created_at） -->
+
+            <!-- 确认绑定按钮：仅当状态为待确认时显示 -->
+            {% if binding.status == 'pending' %}
+                <form method="POST" action="{{ url_for('binding.confirm_binding', binding_id=binding.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-success mt-3" onclick="return confirm('确定要确认该绑定吗？')">
+                        确认绑定
+                    </button>
+                </form>
+            {% endif %}
+
+            <a href="{{ url_for('shopping.shopping_circle') }}" class="btn btn-secondary mt-3">返回购物圈</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
