@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+
+{% block title %}选择用户身份 - 代购/购物系统{% endblock %}
+
+{% block content %}
+<!-- 苹果风格核心样式 -->
+<style>
+    /* 引入苹果官方字体 */
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+
+    :root {
+        /* 苹果原生色调体系（严格遵循官方色值） */
+        --apple-bg: #F5F5F7;          /* 全局背景（苹果官网主背景） */
+        --apple-card-bg: #FFFFFF;     /* 卡片背景（纯白，突出内容） */
+        --apple-card-header-bg: #F5F5F7; /* 卡片头部灰（贴合苹果设计） */
+        --apple-border: #E6E6E8;      /* 轻量边框（苹果UI通用分割线） */
+        --apple-border-hover: #D2D2D7;/* 交互态边框 */
+        --apple-text-primary: #1D1D1F;/* 主文本（最深灰，保证可读性） */
+        --apple-text-secondary: #86868B;/* 次要文本（中等灰） */
+        --apple-text-tertiary: #6E6E73;/* 三级文本（更浅灰） */
+        --apple-accent: #0071E3;      /* 苹果蓝（主交互色，官方色值） */
+        --apple-accent-hover: #0077ED;/* 按钮hover（苹果蓝高亮态） */
+        --apple-accent-active: #0066CC;/* 按钮点击态 */
+        --apple-danger: #FF3B30;      /* 错误文本（苹果原生警告红） */
+        --apple-radio-active: #0071E3;/* 单选选中色 */
+        --apple-radio-hover: rgba(0, 113, 227, 0.06); /* 单选hover背景 */
+
+        /* 苹果风格阴影（层级化） */
+        --apple-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --apple-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --apple-btn-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+    }
+
+    /* 全局样式重置 */
+    * {
+        font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background-color: var(--apple-bg) !important;
+        color: var(--apple-text-primary) !important;
+        -webkit-font-smoothing: antialiased !important; /* 苹果字体抗锯齿 */
+        -moz-osx-font-smoothing: grayscale !important;
+        line-height: 1.47059 !important; /* 苹果原生行高 */
+    }
+
+    /* 页面容器 */
+    .apple-page-container {
+        padding: 32px 20px !important; /* 苹果通用间距（px更精准） */
+        max-width: 100% !important;
+    }
+
+    /* 苹果风格卡片（严格遵循苹果Card设计） */
+    .apple-card {
+        background-color: var(--apple-card-bg) !important;
+        border-radius: 20px !important; /* 苹果大圆角 */
+        border: 1px solid var(--apple-border) !important;
+        box-shadow: var(--apple-shadow-sm) !important;
+        overflow: hidden !important;
+        max-width: 428px !important; /* 适配iPhone Pro宽度 */
+        margin: 0 auto !important;
+        transition: box-shadow 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important; /* 苹果原生动画曲线 */
+    }
+
+    .apple-card:hover {
+        box-shadow: var(--apple-shadow) !important;
+    }
+
+    /* 卡片头部（苹果灰色风格，替代原蓝色） */
+    .apple-card-header {
+        background-color: var(--apple-card-header-bg) !important;
+        color: var(--apple-text-primary) !important; /* 主文本色，保证对比度 */
+        padding: 20px 24px !important; /* 苹果精准间距 */
+        text-align: center !important;
+        border-bottom: 1px solid var(--apple-border) !important; /* 轻量分割线 */
+    }
+
+    .apple-card-title {
+        font-weight: 600 !important;
+        font-size: 20px !important; /* 苹果标题字号 */
+        letter-spacing: -0.02em !important; /* 苹果字符间距 */
+        line-height: 1.2 !important;
+    }
+
+    /* 卡片内容区 */
+    .apple-card-body {
+        padding: 28px 24px !important; /* 内间距优化 */
+    }
+
+    /* 表单标签（苹果表单样式） */
+    .apple-form-label {
+        font-weight: 500 !important;
+        color: var(--apple-text-primary) !important;
+        font-size: 17px !important; /* 苹果表单标签字号 */
+        margin-bottom: 16px !important;
+        display: block !important;
+    }
+
+    /* 单选按钮组 */
+    .apple-radio-group {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important; /* 苹果单选框间距 */
+        margin-bottom: 24px !important;
+    }
+
+    /* 苹果风格单选按钮（原生交互逻辑） */
+    .apple-radio-item {
+        display: flex !important;
+        align-items: center !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important; /* 苹果小圆角 */
+        border: 1px solid var(--apple-border) !important;
+        cursor: pointer !important;
+        transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+        position: relative !important;
+    }
+
+    .apple-radio-item:hover {
+        background-color: var(--apple-radio-hover) !important;
+        border-color: var(--apple-border-hover) !important;
+    }
+
+    /* 隐藏原生单选按钮 */
+    .apple-radio-input {
+        opacity: 0 !important;
+        position: absolute !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* 自定义单选按钮样式（苹果原生样式） */
+    .apple-radio-custom {
+        width: 20px !important;
+        height: 20px !important;
+        border-radius: 50% !important;
+        border: 2px solid var(--apple-text-secondary) !important;
+        margin-right: 16px !important;
+        position: relative !important;
+        transition: border-color 0.2s ease-in-out !important;
+        flex-shrink: 0 !important; /* 防止压缩 */
+    }
+
+    /* 选中状态（苹果蓝高亮） */
+    .apple-radio-input:checked + .apple-radio-custom {
+        border-color: var(--apple-radio-active) !important;
+    }
+
+    /* 选中后的圆点（苹果精准尺寸） */
+    .apple-radio-input:checked + .apple-radio-custom::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 10px !important;
+        height: 10px !important;
+        border-radius: 50% !important;
+        background-color: var(--apple-radio-active) !important;
+    }
+
+    /* 单选标签文本 */
+    .apple-radio-label {
+        font-size: 16px !important; /* 苹果正文字号 */
+        color: var(--apple-text-primary) !important;
+        cursor: pointer !important;
+        flex: 1 !important;
+        line-height: 1.5 !important;
+    }
+
+    /* 错误提示（苹果警告样式） */
+    .apple-error-text {
+        color: var(--apple-danger) !important;
+        font-size: 14px !important; /* 苹果提示文本字号 */
+        margin-top: 8px !important;
+        display: block !important;
+        line-height: 1.42857 !important;
+    }
+
+    /* 苹果风格按钮（严格遵循苹果按钮设计） */
+    .apple-btn {
+        border-radius: 980px !important; /* 苹果全圆角按钮 */
+        font-weight: 500 !important;
+        padding: 14px 20px !important; /* 苹果按钮内间距 */
+        font-size: 17px !important; /* 苹果按钮字号 */
+        border: none !important;
+        background-color: var(--apple-accent) !important;
+        color: #FFFFFF !important; /* 纯白文字，保证对比度 */
+        width: 100% !important;
+        transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+        cursor: pointer !important;
+    }
+
+    .apple-btn:hover {
+        background-color: var(--apple-accent-hover) !important;
+        box-shadow: var(--apple-btn-shadow) !important;
+    }
+
+    .apple-btn:active {
+        background-color: var(--apple-accent-active) !important;
+        box-shadow: none !important; /* 点击时取消阴影，模拟按压 */
+    }
+
+    /* 卡片底部（苹果次级背景） */
+    .apple-card-footer {
+        background-color: var(--apple-bg) !important;
+        border-top: 1px solid var(--apple-border) !important;
+        padding: 16px 24px !important;
+        text-align: center !important;
+    }
+
+    /* 底部链接（苹果链接样式） */
+    .apple-footer-link {
+        color: var(--apple-accent) !important;
+        text-decoration: none !important;
+        font-size: 14px !important;
+        transition: color 0.2s ease-in-out !important;
+    }
+
+    .apple-footer-link:hover {
+        color: var(--apple-accent-hover) !important;
+        text-decoration: underline !important;
+        text-underline-offset: 2px !important; /* 苹果链接下划线偏移 */
+    }
+
+    /* 分隔符 */
+    .apple-separator {
+        color: var(--apple-text-secondary) !important;
+        margin: 0 8px !important; /* 精准间距 */
+        font-size: 14px !important;
+    }
+
+    /* 响应式适配（苹果移动端逻辑） */
+    @media (max-width: 480px) {
+        .apple-card {
+            border-radius: 0 !important; /* 移动端全屏无圆角 */
+            height: 100vh !important;
+            max-width: 100% !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .apple-card-header {
+            padding: 16px 20px !important;
+        }
+
+        .apple-card-body {
+            padding: 24px 20px !important;
+        }
+
+        .apple-card-footer {
+            padding: 16px 20px !important;
+        }
+    }
+</style>
+
+<div class="container apple-page-container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <!-- 苹果风格卡片 -->
+            <div class="apple-card">
+                <!-- 卡片头部（苹果灰色调） -->
+                <div class="apple-card-header">
+                    <h4 class="apple-card-title">切换身份</h4>
+                </div>
+
+                <!-- 卡片内容区 -->
+                <div class="apple-card-body">
+                    <!-- 身份选择表单 -->
+                    <form method="POST">
+                        {{ form.hidden_tag() }}  <!-- CSRF 保护 -->
+
+                        <!-- 身份选项（自定义单选按钮） -->
+                        <div class="mb-4">
+                            <div class="apple-radio-group">
+                                {% for subfield in form.identity_type %}
+                                    {# 核心修改：根据当前用户身份设置默认选中相反选项 #}
+                                    {% set is_checked = false %}
+                                    {% if current_user.is_agent %}
+                                        {# 当前是代购用户 → 默认选中普通用户 #}
+                                        {% if subfield.data == 'normal' %}
+                                            {% set is_checked = true %}
+                                        {% endif %}
+                                    {% else %}
+                                        {# 当前是普通用户 → 默认选中代购用户 #}
+                                        {% if subfield.data == 'agent' %}
+                                            {% set is_checked = true %}
+                                        {% endif %}
+                                    {% endif %}
+
+                                    <div class="apple-radio-item">
+                                        {{ subfield(class="apple-radio-input", id=subfield.id, checked=is_checked) }}
+                                        <span class="apple-radio-custom"></span>
+                                        <label class="apple-radio-label" for="{{ subfield.id }}">
+                                            {{ subfield.label.text }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- 表单验证错误提示 -->
+                            {% if form.identity_type.errors %}
+                                {% for error in form.identity_type.errors %}
+                                    <span class="apple-error-text">{{ error }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- 提交按钮 -->
+                        <div class="d-grid">
+                            {{ form.submit(class="apple-btn") }}
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 卡片底部 -->
+                <div class="apple-card-footer">
+                    <a href="{{ url_for('home') }}" class="apple-footer-link">返回首页</a>
+                    <span class="apple-separator">|</span>
+                    <a href="{{ url_for('auth.logout') }}" class="apple-footer-link">退出登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

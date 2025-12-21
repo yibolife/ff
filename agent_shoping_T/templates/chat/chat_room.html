@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+
+{% block title %}与 {{ opponent.username }} 的聊天{% endblock %}
+
+{% block content %}
+<!-- 苹果风格核心样式 -->
+<style>
+    /* 引入苹果官方字体 */
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+
+    :root {
+        /* 苹果原生色调体系 */
+        --apple-bg: #f5f5f7;
+        --apple-card-bg: #ffffff;
+        --apple-border: #e6e6e8;
+        --apple-text-primary: #1d1d1f;
+        --apple-text-secondary: #86868b;
+        --apple-accent: #0071e3; /* 苹果蓝 */
+        --apple-light-blue: #e8f4ff; /* 自己消息背景 */
+        --apple-light-gray: #f2f2f7; /* 对方消息背景 */
+        --apple-warning: #ff9500; /* 苹果橙 */
+        --apple-warning-bg: #fff8e6; /* 警告背景 */
+
+        /* 苹果风格阴影 */
+        --apple-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --apple-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* 全局样式重置 */
+    * {
+        font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    }
+
+    body {
+        background-color: var(--apple-bg) !important;
+        color: var(--apple-text-primary) !important;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* 苹果风格聊天卡片 */
+    .apple-chat-card {
+        background-color: var(--apple-card-bg) !important;
+        border-radius: 20px !important;
+        border: 1px solid var(--apple-border) !important;
+        box-shadow: var(--apple-shadow-sm) !important;
+        overflow: hidden !important;
+        max-width: 800px !important;
+        margin: 0 auto !important;
+    }
+
+    /* 聊天头部 */
+    .apple-chat-header {
+        background-color: var(--apple-card-bg) !important;
+        border-bottom: 1px solid var(--apple-border) !important;
+        padding: 1rem 1.5rem !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    /* 返回按钮 - 关键修改：添加 text-decoration: none 取消下划线 */
+    .apple-back-btn {
+        background-color: var(--apple-light-gray) !important;
+        color: var(--apple-accent) !important;
+        border: none !important;
+        border-radius: 16px !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        transition: background-color 0.2s ease-in-out !important;
+        text-decoration: none !important; /* 取消下划线核心样式 */
+    }
+
+    .apple-back-btn:hover {
+        background-color: rgba(0, 113, 227, 0.1) !important;
+        text-decoration: none !important; /* 确保 hover 时也无下划线 */
+    }
+
+    /* 聊天标题 */
+    .apple-chat-title {
+        font-weight: 500 !important;
+        font-size: 1.1rem !important;
+        color: var(--apple-text-primary) !important;
+        margin: 0 !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    /* 占位元素 */
+    .apple-placeholder {
+        width: 86px !important;
+    }
+
+    /* 消息区域 */
+    .apple-messages-container {
+        height: 500px !important;
+        overflow-y: auto !important;
+        background-color: var(--apple-bg) !important;
+        padding: 1.5rem !important;
+    }
+
+    /* 自定义滚动条（苹果风格） */
+    .apple-messages-container::-webkit-scrollbar {
+        width: 6px !important;
+    }
+
+    .apple-messages-container::-webkit-scrollbar-track {
+        background: var(--apple-light-gray) !important;
+        border-radius: 3px !important;
+    }
+
+    .apple-messages-container::-webkit-scrollbar-thumb {
+        background: var(--apple-text-secondary) !important;
+        border-radius: 3px !important;
+    }
+
+    /* 消息气泡 */
+    .apple-message-self {
+        text-align: right !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .apple-message-opponent {
+        text-align: left !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .apple-message-bubble {
+        display: inline-block !important;
+        padding: 0.75rem 1rem !important;
+        border-radius: 18px !important;
+        max-width: 75% !important;
+        box-shadow: var(--apple-shadow-sm) !important;
+        line-height: 1.4 !important;
+    }
+
+    .apple-message-self .apple-message-bubble {
+        background-color: var(--apple-accent) !important;
+        color: white !important;
+        border-bottom-right-radius: 4px !important;
+    }
+
+    .apple-message-opponent .apple-message-bubble {
+        background-color: var(--apple-light-gray) !important;
+        color: var(--apple-text-primary) !important;
+        border-bottom-left-radius: 4px !important;
+    }
+
+    /* 消息时间 */
+    .apple-message-time {
+        font-size: 0.75rem !important;
+        opacity: 0.8 !important;
+        margin-top: 0.25rem !important;
+        display: block !important;
+    }
+
+    /* 输入区域 */
+    .apple-chat-footer {
+        background-color: var(--apple-card-bg) !important;
+        border-top: 1px solid var(--apple-border) !important;
+        padding: 1rem 1.5rem !important;
+    }
+
+    /* 输入框组 */
+    .apple-input-group {
+        display: flex !important;
+        gap: 0.75rem !important;
+        align-items: center !important;
+    }
+
+    /* 消息输入框 */
+    .apple-message-input {
+        flex: 1 !important;
+        border-radius: 20px !important;
+        border: 1px solid var(--apple-border) !important;
+        padding: 0.85rem 1rem !important;
+        font-size: 0.95rem !important;
+        background-color: var(--apple-light-gray) !important;
+        transition: border-color 0.2s ease-in-out !important;
+    }
+
+    .apple-message-input:focus {
+        border-color: var(--apple-accent) !important;
+        outline: none !important;
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1) !important;
+    }
+
+    /* 发送按钮 */
+    .apple-send-btn {
+        background-color: var(--apple-accent) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 20px !important;
+        padding: 0.85rem 1.25rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
+    }
+
+    .apple-send-btn:hover {
+        background-color: #0077ed !important;
+        box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3) !important;
+    }
+
+    /* 错误提示 */
+    .apple-alert-warning {
+        background-color: var(--apple-warning-bg) !important;
+        border: 1px solid var(--apple-warning) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+        color: #cc7a00 !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .apple-alert-warning .btn-close {
+        opacity: 0.7 !important;
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+        .apple-chat-card {
+            border-radius: 0 !important;
+            height: 100vh !important;
+            max-width: 100% !important;
+        }
+
+        .apple-messages-container {
+            height: calc(100vh - 160px) !important;
+            padding: 1rem !important;
+        }
+
+        .apple-chat-header, .apple-chat-footer {
+            padding: 0.75rem 1rem !important;
+        }
+
+        .apple-message-bubble {
+            max-width: 85% !important;
+        }
+    }
+</style>
+
+<!-- 苹果风格聊天卡片 -->
+<div class="apple-chat-card mb-4">
+    <!-- 聊天头部 -->
+    <div class="apple-chat-header">
+        <!-- 返回按钮 -->
+        <a href="javascript:history.back()" class="apple-back-btn">
+            <i class="bi bi-arrow-left"></i> 返回
+        </a>
+        <!-- 聊天对象标题 -->
+        <h5 class="apple-chat-title">
+            <i class="bi bi-chat-heart text-primary me-2"></i>
+            与 {{ opponent.username }} 的聊天
+        </h5>
+        <!-- 占位元素 -->
+        <div class="apple-placeholder"></div>
+    </div>
+
+    <!-- 聊天消息区域 -->
+    <div id="chat-messages" class="apple-messages-container">
+        <!-- 历史消息会加载到这里 -->
+    </div>
+
+    <!-- 发送消息区域 -->
+    <div class="apple-chat-footer">
+        <div class="apple-input-group">
+            <input type="text" id="message-input" class="apple-message-input"
+                   placeholder="输入消息，按回车发送...">
+            <button id="send-btn" class="apple-send-btn">
+                <i class="bi bi-paper-plane"></i> 发送
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- SocketIO JS库 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+// 初始化SocketIO连接
+const socket = io();
+const roomId = "{{ room_id }}";
+const currentUserId = {{ current_user.id }};
+
+// 页面加载后执行
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. 加入聊天房间
+    socket.emit('join_chat', { room_id: roomId });
+
+    // 2. 加载历史消息
+    socket.emit('load_history', { room_id: roomId });
+
+    // 3. 监听历史消息返回
+    socket.on('history_messages', function(messages) {
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.innerHTML = '';
+        messages.forEach(msg => {
+            addMessageToDOM(msg);
+        });
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    });
+
+    // 4. 监听新消息
+    socket.on('chat_message', function(msg) {
+        addMessageToDOM(msg);
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    });
+
+    // 5. 监听错误消息（苹果风格提示）
+    socket.on('chat_error', function(data) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'apple-alert-warning alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-2"></i>${data.msg}
+            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.getElementById('chat-messages').prepend(alertDiv);
+        // 3秒后自动关闭
+        setTimeout(() => {
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 1000);
+        }, 3000);
+    });
+
+    // 6. 发送消息事件
+    document.getElementById('send-btn').addEventListener('click', sendMessage);
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+});
+
+// 发送消息函数
+function sendMessage() {
+    const input = document.getElementById('message-input');
+    const content = input.value.trim();
+    if (!content) return;
+
+    socket.emit('send_message', {
+        room_id: roomId,
+        content: content
+    });
+    input.value = '';
+}
+
+// 添加消息到DOM（苹果风格消息气泡）
+function addMessageToDOM(msg) {
+    const messagesContainer = document.getElementById('chat-messages');
+    const isCurrentUser = msg.sender_id == currentUserId;
+
+    // 消息外层容器
+    const messageDiv = document.createElement('div');
+    messageDiv.className = isCurrentUser ? 'apple-message-self' : 'apple-message-opponent';
+
+    // 消息气泡容器（苹果风格）
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'apple-message-bubble';
+
+    // 消息内容+时间
+    contentDiv.innerHTML = `
+        ${msg.content.replace(/\n/g, '<br>')}
+        <small class="apple-message-time">${msg.time}</small>
+    `;
+
+    messageDiv.appendChild(contentDiv);
+    messagesContainer.appendChild(messageDiv);
+}
+</script>
+
+<!-- 引入Bootstrap图标 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}

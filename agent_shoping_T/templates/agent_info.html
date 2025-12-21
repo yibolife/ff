@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+
+{% block title %}代购信息 - 代购/购物系统{% endblock %}
+
+{% block content %}
+<!-- 苹果风格核心样式：对齐home页面的色调体系，强化代购橙色主题 -->
+<style>
+    /* 引入苹果官方字体（与home一致） */
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+
+    :root {
+        /* 完全复用home页面的色调体系（苹果原生色值） */
+        --apple-bg: #F5F5F7;          /* 全局背景（苹果官网主背景） */
+        --apple-card-bg: #FFFFFF;     /* 卡片背景（纯白） */
+        --apple-border: #E6E6E8;      /* 轻量边框（苹果通用分割线） */
+        --apple-border-hover: #D2D2D7;/* 交互态边框 */
+        --apple-text-primary: #1D1D1F;/* 主文本（最深灰，WCAG 4.5:1对比度） */
+        --apple-text-secondary: #86868B;/* 次要文本（苹果二级文本色） */
+        --apple-text-tertiary: #6E6E73;/* 三级文本（更浅灰） */
+
+        /* 功能色体系（对齐home，精准匹配苹果官方色值） */
+        --apple-accent: #0071E3;      /* 苹果蓝（主交互色） */
+        --apple-success: #34C759;     /* 苹果绿（成功态） */
+        --apple-success-hover: #2DB84E;/* 成功按钮hover */
+        --apple-warning: #FF9500;     /* 苹果橙（代购主题色，匹配home填写行程按钮） */
+        --apple-warning-hover: #FF8C00;/* 橙色hover */
+        --apple-warning-active: #FF7A00;/* 橙色点击态 */
+        --apple-info: #5AC8FA;        /* 苹果浅蓝 */
+        --apple-danger: #FF3B30;      /* 苹果红（警告/删除） */
+        --apple-danger-hover: #FF2D37;/* 红色hover */
+        --apple-secondary: #86868B;   /* 苹果灰（次要操作） */
+
+        /* 背景变体（适配代购场景） */
+        --apple-light-bg: #F2F2F7;
+        --apple-warning-light: rgba(255, 149, 0, 0.06); /* 橙色轻量背景（苹果标准透明度） */
+
+        /* 阴影体系（苹果层级化阴影） */
+        --apple-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --apple-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        --apple-btn-shadow-warning: 0 2px 8px rgba(255, 149, 0, 0.3);
+        --apple-btn-shadow-success: 0 2px 8px rgba(52, 199, 89, 0.3);
+        --apple-btn-shadow-danger: 0 2px 8px rgba(255, 59, 48, 0.3);
+
+        /* 通用过渡动画（苹果原生曲线） */
+        --apple-transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    /* 全局样式重置（严格对齐苹果原生基准） */
+    * {
+        font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+        box-sizing: border-box !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background-color: var(--apple-bg) !important;
+        color: var(--apple-text-primary) !important;
+        line-height: 1.47059 !important; /* 苹果原生行高 */
+    }
+
+    /* 页面容器优化（苹果精准间距） */
+    .apple-container {
+        max-width: 800px !important;
+        margin: 32px auto !important; /* 2rem → 32px更精准 */
+        padding: 0 16px !important; /* 1rem → 16px */
+    }
+
+    /* 苹果风格卡片（完全对齐home的apple-hero样式，强化层级） */
+    .apple-card {
+        background-color: var(--apple-card-bg) !important;
+        border-radius: 24px !important; /* 苹果大圆角，与home一致 */
+        border: 1px solid var(--apple-border) !important;
+        box-shadow: var(--apple-shadow-sm) !important;
+        overflow: hidden !important;
+        margin-bottom: 24px !important; /* 1.5rem → 24px */
+        transition: var(--apple-transition) !important;
+    }
+
+    .apple-card:hover {
+        box-shadow: var(--apple-shadow) !important; /* 与home的hover阴影一致 */
+    }
+
+    /* 卡片头部样式（代购橙色主题，苹果原生排版） */
+    .apple-card-header {
+        padding: 16px 24px !important; /* 1rem 1.5rem → 16px 24px */
+        border-bottom: none !important;
+        color: #FFFFFF !important; /* 纯白文字，保证高对比度 */
+        transition: var(--apple-transition) !important;
+    }
+
+    .header-primary {
+        background-color: var(--apple-warning) !important; /* 代购主题橙（匹配home填写行程按钮） */
+    }
+
+    .header-primary:hover {
+        background-color: var(--apple-warning-hover) !important;
+        box-shadow: var(--apple-btn-shadow-warning) !important;
+    }
+
+    .header-secondary {
+        background-color: var(--apple-secondary) !important; /* 苹果灰（次要卡片头部） */
+    }
+
+    .apple-card-header h2, .apple-card-header h3 {
+        font-weight: 600 !important;
+        margin: 0 !important;
+        letter-spacing: -0.02em !important; /* 苹果字符间距，与home一致 */
+        line-height: 1.2 !important;
+    }
+
+    .apple-card-header h2 {
+        font-size: 18px !important; /* fs-4 → 18px，苹果卡片标题字号 */
+    }
+
+    .apple-card-header h3 {
+        font-size: 16px !important; /* fs-5 → 16px，二级标题字号 */
+    }
+
+    /* 卡片内容区（苹果内间距规范） */
+    .apple-card-body {
+        padding: 24px !important; /* 1.5rem → 24px */
+    }
+
+    /* 表单控件样式（苹果风格，强化代购橙色主题） */
+    .apple-form-control {
+        border-radius: 12px !important; /* 苹果表单圆角 */
+        border: 1px solid var(--apple-border) !important;
+        padding: 12px 16px !important; /* 0.75rem 1rem → 12px 16px */
+        font-size: 16px !important; /* 0.95rem → 16px，苹果输入框字号 */
+        background-color: var(--apple-card-bg) !important;
+        transition: var(--apple-transition) !important;
+        color: var(--apple-text-primary) !important;
+    }
+
+    .apple-form-control::placeholder {
+        color: var(--apple-text-secondary) !important; /* 占位符用苹果二级文本色 */
+        opacity: 1 !important;
+    }
+
+    .apple-form-control:focus {
+        border-color: var(--apple-warning) !important; /* 聚焦色匹配代购橙色主题 */
+        box-shadow: 0 0 0 4px var(--apple-warning-light) !important; /* 轻量高亮，苹果原生交互 */
+        outline: none !important;
+    }
+
+    .apple-form-control.is-invalid {
+        border-color: var(--apple-danger) !important;
+        box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.06) !important; /* 错误态轻量高亮 */
+    }
+
+    /* 标签样式（苹果表单标签规范） */
+    .apple-form-label {
+        font-weight: 500 !important;
+        color: var(--apple-text-primary) !important;
+        margin-bottom: 8px !important; /* 0.5rem → 8px */
+        font-size: 16px !important;
+    }
+
+    /* 辅助文本样式（苹果提示文本规范） */
+    .apple-form-text {
+        color: var(--apple-text-secondary) !important;
+        font-size: 14px !important; /* 0.85rem → 14px */
+        margin-top: 4px !important; /* 0.25rem → 4px */
+        line-height: 1.42857 !important;
+    }
+
+    /* 苹果风格按钮（完全对齐home，强化代购橙色主题） */
+    .btn-apple {
+        border-radius: 980px !important; /* 苹果全圆角按钮（替代原20px） */
+        font-weight: 500 !important;
+        padding: 14px 20px !important; /* 10px 20px → 14px 20px，匹配home按钮内间距 */
+        font-size: 17px !important; /* 与home按钮字号一致 */
+        border: none !important;
+        transition: var(--apple-transition) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important; /* 与home按钮图标间距一致 */
+        min-width: 120px !important; /* 与home按钮最小宽度一致 */
+        cursor: pointer !important;
+    }
+
+    /* 保存按钮：代购橙色主题（匹配home填写行程按钮） */
+    .btn-apple-primary {
+        background-color: var(--apple-warning) !important;
+        color: #FFFFFF !important;
+    }
+
+    .btn-apple-primary:hover {
+        background-color: var(--apple-warning-hover) !important;
+        box-shadow: var(--apple-btn-shadow-warning) !important;
+    }
+
+    .btn-apple-primary:active {
+        background-color: var(--apple-warning-active) !important;
+        box-shadow: none !important; /* 点击取消阴影，模拟苹果原生按压 */
+    }
+
+    .btn-apple-success {
+        background-color: var(--apple-success) !important;
+        color: #FFFFFF !important;
+    }
+
+    .btn-apple-success:hover {
+        background-color: var(--apple-success-hover) !important;
+        box-shadow: var(--apple-btn-shadow-success) !important;
+    }
+
+    .btn-apple-success:active {
+        background-color: #29A745 !important;
+        box-shadow: none !important;
+    }
+
+    .btn-apple-outline-success {
+        border: 1px solid var(--apple-success) !important;
+        color: var(--apple-success) !important;
+        background-color: transparent !important;
+    }
+
+    .btn-apple-outline-success:hover {
+        background-color: rgba(52, 199, 89, 0.06) !important; /* 苹果标准透明度 */
+        box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2) !important;
+        border-color: var(--apple-success-hover) !important;
+    }
+
+    .btn-apple-danger {
+        background-color: var(--apple-danger) !important;
+        color: #FFFFFF !important;
+    }
+
+    .btn-apple-danger:hover {
+        background-color: var(--apple-danger-hover) !important;
+        box-shadow: var(--apple-btn-shadow-danger) !important;
+    }
+
+    .btn-apple-danger:active {
+        background-color: #FF1C24 !important;
+        box-shadow: none !important;
+    }
+
+    /* 行程信息区块（苹果轻量背景，强化橙色主题） */
+    .apple-itinerary-block {
+        background-color: var(--apple-warning-light) !important; /* 苹果标准透明度，替代0.05 */
+        border-radius: 12px !important;
+        padding: 16px !important; /* 1rem → 16px */
+        border: 1px solid var(--apple-border) !important;
+        line-height: 1.5 !important; /* 苹果文本行高，替代1.8 */
+        color: var(--apple-text-primary) !important;
+    }
+
+    /* 徽章样式（苹果风格，色调对齐状态） */
+    .apple-badge {
+        border-radius: 12px !important; /* 苹果徽章圆角 */
+        padding: 4px 8px !important;
+        font-weight: 500 !important;
+        font-size: 14px !important; /* 0.8rem → 14px */
+        border: none !important;
+    }
+
+    .bg-success {
+        background-color: var(--apple-success) !important;
+        color: #FFFFFF !important;
+    }
+
+    .bg-warning {
+        background-color: var(--apple-warning-light) !important;
+        color: var(--apple-warning) !important;
+    }
+
+    /* 文本样式（苹果层级化文本） */
+    .apple-tip-text {
+        color: var(--apple-text-secondary) !important;
+        font-size: 14px !important; /* 0.85rem → 14px */
+        margin-top: 8px !important; /* 0.5rem → 8px */
+        line-height: 1.42857 !important;
+        text-align: center !important;
+    }
+
+    .apple-danger-text {
+        color: var(--apple-danger) !important;
+        font-size: 14px !important;
+        margin-top: 8px !important;
+        line-height: 1.42857 !important;
+        text-align: center !important;
+    }
+
+    /* 无数据提示（苹果风格，匹配代购橙色主题） */
+    .apple-alert-info {
+        background-color: var(--apple-warning-light) !important; /* 苹果标准透明度 */
+        border: 1px solid var(--apple-border) !important;
+        border-radius: 12px !important;
+        color: var(--apple-warning) !important; /* 文字色匹配代购橙 */
+        text-align: center !important;
+        padding: 16px !important; /* 1rem → 16px */
+        line-height: 1.5 !important;
+    }
+
+    /* 响应式适配（严格对齐home的移动端规则） */
+    @media (max-width: 768px) {
+        .apple-card-body {
+            padding: 16px !important; /* 1rem → 16px */
+        }
+
+        .apple-card-header {
+            padding: 12px 16px !important; /* 0.75rem 1rem → 12px 16px */
+        }
+
+        .btn-apple {
+            width: 100% !important; /* 移动端按钮全屏宽，与home一致 */
+            margin-bottom: 8px !important; /* 0.5rem → 8px */
+            padding: 12px 16px !important; /* 0.75rem 0.9rem → 12px 16px */
+            font-size: 17px !important; /* 与home移动端按钮字号一致 */
+        }
+
+        .apple-container {
+            margin: 16px auto !important; /* 移动端缩小外间距 */
+            padding: 0 8px !important;
+        }
+
+        .apple-itinerary-block {
+            padding: 12px !important;
+        }
+    }
+</style>
+
+<div class="apple-container">
+    <!-- 代购信息填写卡片：头部底色改为home填写行程的橙色 -->
+    <div class="card apple-card">
+        <div class="card-header apple-card-header header-primary">
+            <h2 class="text-center mb-0 fs-4">代购信息填写</h2>
+        </div>
+        <div class="card-body apple-card-body">
+            <!-- 保存代购信息表单 -->
+            <form method="POST" action="{{ url_for('agent.agent_info') }}">
+                {{ form.hidden_tag() }}  <!-- CSRF 令牌保护 -->
+
+                <!-- 代购时间字段 -->
+                <div class="mb-4">
+                    {{ form.time.label(class="form-label apple-form-label") }}
+                    {{ form.time(
+                        class="form-control apple-form-control" + (" is-invalid" if form.time.errors else ""),
+                        placeholder="选择代购时间（可选）",
+                        value=form.time.data.strftime('%Y-%m-%dT%H:%M') if form.time.data else ""
+                    ) }}
+                    <div class="form-text apple-form-text">请选择计划代购的具体时间（日期+时段），不选则默认无固定时间</div>
+                    {% if form.time.errors %}
+                        <div class="invalid-feedback">{{ form.time.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- 代购地点字段 -->
+                <div class="mb-4">
+                    {{ form.location.label(class="form-label apple-form-label") }}
+                    {{ form.location(
+                        class="form-control apple-form-control" + (" is-invalid" if form.location.errors else ""),
+                        placeholder="例如：XX商场、XX线上平台"
+                    ) }}
+                    <div class="form-text apple-form-text">请填写准确的代购地点，便于用户了解</div>
+                    {% if form.location.errors %}
+                        <div class="invalid-feedback">{{ form.location.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- 行程安排字段 -->
+                <div class="mb-4">
+                    {{ form.itinerary.label(class="form-label apple-form-label") }}
+                    {{ form.itinerary(
+                        class="form-control apple-form-control" + (" is-invalid" if form.itinerary.errors else ""),
+                        rows=5,
+                        placeholder="示例：" + "\n" + "1、上午10点前往XX商场采购，下午3点返回XX小区，支持自提或送货上门"+"\n" + "2、常驻xx国某地，可代购xx"
+                    ) }}
+                    <div class="form-text apple-form-text">请详细描述行程安排，至少10个字符，帮助用户判断是否符合需求</div>
+                    {% if form.itinerary.errors %}
+                        <div class="invalid-feedback d-block">{{ form.itinerary.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- 保存按钮：底色改为home填写行程的橙色 -->
+                <div class="d-grid gap-2">
+                    {{ form.save_submit(class="btn btn-apple btn-apple-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 已保存的代购信息卡片（有数据才显示） -->
+    {% if existing_info %}
+        <div class="card apple-card">
+            <div class="card-header apple-card-header header-secondary">
+                <h3 class="text-center mb-0 fs-5">已保存的代购行程信息</h3>
+            </div>
+            <div class="card-body apple-card-body">
+                <!-- 行程信息展示 -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <p class="mb-1"><strong class="text-dark">时间：</strong>
+                            {{ existing_info.time.strftime('%Y-%m-%d %H:%M') if existing_info.time else "未设置固定时间" }}
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <p class="mb-1"><strong class="text-dark">地点：</strong>{{ existing_info.location }}</p>
+                    </div>
+                    <div class="col-12">
+                        <p class="mb-1"><strong class="text-dark">行程计划：</strong></p>
+                        <div class="apple-itinerary-block">
+                            {{ existing_info.itinerary | replace('\n', '<br>') | safe }}
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <p class="mb-0">
+                            <strong class="text-dark">状态：</strong>
+                            {% if existing_info.is_submitted %}
+                                <span class="badge apple-badge bg-success">已加入代购圈</span>
+                            {% else %}
+                                <span class="badge apple-badge bg-warning text-dark">未加入代购圈</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 操作按钮区域 -->
+                <div class="d-flex flex-column gap-3 mt-4">
+                    <!-- 已加入代购圈：显示前往购物圈按钮 -->
+                    {% if existing_info.is_submitted %}
+                        <a href="{{ url_for('shopping.shopping_circle') }}" class="btn btn-apple btn-apple-outline-success">
+                            前往购物圈查看商品需求
+                        </a>
+                    {% else %}
+                        <!-- 未加入代购圈：显示加入按钮 -->
+                        <form method="POST" action="{{ url_for('agent.agent_info') }}">
+                            {{ submit_form.hidden_tag() }}
+                            <div class="d-grid">
+                                {{ submit_form.join_submit(class="btn btn-apple btn-apple-success") }}
+                            </div>
+                            <small class="text-center d-block apple-tip-text">
+                                点击后将您的行程信息加入代购圈，可接收用户商品需求
+                            </small>
+                        </form>
+                    {% endif %}
+
+                    <!-- 删除按钮 -->
+                    <form method="POST" action="{{ url_for('agent.agent_info') }}"
+                          onsubmit="return confirm('确定要删除吗？\n- 会删除您的代购行程数据\n- 会解除您与所有用户的绑定关系\n- 您的代购身份不会改变，可重新填写行程');">
+                        {{ delete_form.hidden_tag() }}
+                        <div class="d-grid">
+                            {{ delete_form.delete_submit(class="btn btn-apple btn-apple-danger") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- 无行程数据时：提示用户可填写行程（匹配橙色主题） -->
+        <div class="apple-alert-info">
+            您已具备代购身份，但尚未填写代购行程信息<br>
+            填写并保存行程后，可加入代购圈接收用户商品需求
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
