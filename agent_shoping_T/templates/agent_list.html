@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}代购圈 - 代购/购物系统{% endblock %}
+
+{% block content %}
+<!-- 苹果风格核心样式 -->
+<style>
+    /* 引入苹果官方字体 */
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+
+    :root {
+        /* 苹果原生色调体系 */
+        --apple-bg: #f5f5f7;
+        --apple-card-bg: #ffffff;
+        --apple-border: #e6e6e8;
+        --apple-text-primary: #1d1d1f;
+        --apple-text-secondary: #86868b;
+        --apple-accent: #0071e3; /* 苹果蓝（主色调） */
+        --apple-success: #34c759; /* 苹果绿 */
+        --apple-danger: #ff3b30; /* 苹果红 */
+        --apple-light-bg: #f2f2f7; /* 浅灰背景 */
+
+        /* 苹果风格阴影 */
+        --apple-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --apple-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* 全局样式重置 */
+    * {
+        font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    }
+
+    body {
+        background-color: var(--apple-bg) !important;
+        color: var(--apple-text-primary) !important;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* 页面容器 */
+    .apple-page-container {
+        padding: 1rem 0 !important;
+    }
+
+    /* 苹果风格主卡片 */
+    .apple-main-card {
+        background-color: var(--apple-card-bg) !important;
+        border-radius: 20px !important;
+        border: 1px solid var(--apple-border) !important;
+        box-shadow: var(--apple-shadow-sm) !important;
+        overflow: hidden !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    /* 主卡片头部 */
+    .apple-main-header {
+        background-color: var(--apple-accent) !important;
+        color: white !important;
+        padding: 1.25rem 1.5rem !important;
+        text-align: center !important;
+        border-bottom: none !important;
+    }
+
+    .apple-main-title {
+        font-weight: 600 !important;
+        font-size: 1.25rem !important;
+        margin: 0 !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    /* 主卡片内容区 */
+    .apple-main-body {
+        padding: 1.5rem !important;
+    }
+
+    /* 消息提示（苹果风格） */
+    .apple-alert {
+        border-radius: 12px !important;
+        border: 1px solid var(--apple-border) !important;
+        background-color: var(--apple-card-bg) !important;
+        box-shadow: var(--apple-shadow-sm) !important;
+        padding: 1rem !important;
+        margin-bottom: 1rem !important;
+        border-left: 4px solid transparent !important;
+    }
+
+    .alert-primary.apple-alert {
+        border-left-color: var(--apple-accent) !important;
+        color: #0066cc !important;
+    }
+
+    .alert-success.apple-alert {
+        border-left-color: var(--apple-success) !important;
+        color: #00a82d !important;
+    }
+
+    .alert-danger.apple-alert {
+        border-left-color: var(--apple-danger) !important;
+        color: #d30000 !important;
+    }
+
+    .apple-alert .btn-close {
+        opacity: 0.7 !important;
+    }
+
+    /* 代购卡片网格 */
+    .apple-card-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+        gap: 1rem !important;
+        margin-top: 0.5rem !important;
+    }
+
+    /* 代购信息卡片 */
+    .apple-agent-card {
+        background-color: var(--apple-card-bg) !important;
+        border-radius: 16px !important;
+        border: 1px solid var(--apple-accent) !important;
+        box-shadow: var(--apple-shadow-sm) !important;
+        height: 100% !important;
+        transition: box-shadow 0.2s ease-in-out !important;
+        overflow: hidden !important;
+    }
+
+    .apple-agent-card:hover {
+        box-shadow: var(--apple-shadow) !important;
+    }
+
+    /* 代购卡片内容 */
+    .apple-agent-body {
+        padding: 1.25rem !important;
+    }
+
+    /* 代购标题 */
+    .apple-agent-title {
+        font-weight: 500 !important;
+        font-size: 1.1rem !important;
+        color: var(--apple-text-primary) !important;
+        margin-bottom: 1rem !important;
+    }
+
+    /* 代购信息文本 */
+    .apple-agent-text {
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* 行程安排区域 */
+    .apple-itinerary-box {
+        background-color: var(--apple-light-bg) !important;
+        border-radius: 12px !important;
+        padding: 1rem !important;
+        margin: 1rem 0 !important;
+        font-size: 0.9rem !important;
+        line-height: 1.5 !important;
+    }
+
+    .apple-itinerary-title {
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* 状态标签（苹果风格） */
+    .apple-badge {
+        border-radius: 12px !important;
+        padding: 0.25rem 0.75rem !important;
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        border: none !important;
+        background-color: var(--apple-success) !important;
+        color: white !important;
+    }
+
+    /* 按钮样式 */
+    .btn-apple-outline-danger {
+        border-radius: 20px !important;
+        border: 1px solid var(--apple-danger) !important;
+        color: var(--apple-danger) !important;
+        background-color: transparent !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out !important;
+    }
+
+    .btn-apple-outline-danger:hover {
+        background-color: var(--apple-danger) !important;
+        color: white !important;
+    }
+
+    /* 空状态提示 */
+    .apple-empty-state {
+        text-align: center !important;
+        padding: 3rem 1rem !important;
+        color: var(--apple-text-secondary) !important;
+    }
+
+    .apple-empty-text {
+        font-size: 1.1rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .apple-empty-link {
+        color: var(--apple-accent) !important;
+        text-decoration: none !important;
+        font-weight: 500 !important;
+        transition: color 0.2s ease-in-out !important;
+    }
+
+    .apple-empty-link:hover {
+        color: #0077ed !important;
+        text-decoration: underline !important;
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+        .apple-card-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .apple-main-body {
+            padding: 1rem !important;
+        }
+
+        .apple-agent-body {
+            padding: 1rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .apple-main-header {
+            padding: 1rem !important;
+        }
+
+        .apple-main-title {
+            font-size: 1.1rem !important;
+        }
+
+        .apple-empty-state {
+            padding: 2rem 1rem !important;
+        }
+    }
+</style>
+
+<div class="container apple-page-container">
+    <!-- 主卡片 -->
+    <div class="apple-main-card">
+        <!-- 主卡片头部 -->
+        <div class="apple-main-header">
+            <h2 class="apple-main-title">已绑定代购行程信息</h2>
+        </div>
+
+        <!-- 主卡片内容区 -->
+        <div class="apple-main-body">
+            {# 显示消息提示（苹果风格） #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} apple-alert alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% if bound_agents %}  {# 只显示已绑定的代购数据 #}
+                <!-- 代购卡片网格 -->
+                <div class="apple-card-grid">
+                    {% for entry in bound_agents %}
+                        <div class="apple-agent-card">
+                            <div class="apple-agent-body">
+                                <h5 class="apple-agent-title">代购人：{{ entry.user.username }}</h5>
+                                <p class="apple-agent-text">
+                                    <strong>联系电话：</strong>
+                                    {{ entry.user.phone or '未设置' }}
+                                    <br>
+                                    <strong>代购时间：</strong>{{ entry.agent_info.time.strftime('%Y-%m-%d %H:%M') }}<br>
+                                    <strong>代购地点：</strong>{{ entry.agent_info.location }}
+                                </p>
+
+                                <!-- 行程安排 -->
+                                <div class="mt-3">
+                                    <h6 class="apple-itinerary-title">行程安排：</h6>
+                                    <div class="apple-itinerary-box">
+                                        {{ entry.agent_info.itinerary|replace('\n', '<br>')|safe }}
+                                    </div>
+                                </div>
+
+                                {# 已绑定状态显示 #}
+                                {% if current_user.is_authenticated and not current_user.is_agent %}
+                                    <div class="mt-4 d-flex align-items-center gap-2">
+                                        <span class="apple-badge">已绑定</span>
+                                        <a href="{{ url_for('unbind_agent', agent_id=entry.user.id) }}"
+                                           class="btn btn-apple-outline-danger"
+                                           onclick="return confirm('确定要解除绑定吗？')">
+                                            解除绑定
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- 空状态提示 -->
+                <div class="apple-empty-state">
+                    <p class="apple-empty-text">暂无已绑定的代购信息</p>
+                    <p class="text-secondary">
+                        <a href="{{ url_for('agent_list') }}" class="apple-empty-link">查看全部代购</a> 去绑定心仪的代购吧
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 引入Bootstrap图标 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}
